@@ -1,5 +1,5 @@
 # Sync-files
-A simple python class to Sync to folders in a system. should be extensible to network if modified aptly
+A simple python class to Sync two folders in a system. should be extensible to network if modified aptly
 
 The class that can be imported is called Sync
 Usage  
