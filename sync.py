@@ -12,12 +12,16 @@ class Sync():
     def __init__(self , folder1 , folder2 , create=False):
         self.folder1 = self.__normalize_path(folder1)
         self.folder2 = self.__normalize_path(folder2)
+        
         if not os.path.exists(self.folder1):
             raise ValueError("log: Given source path doesn't exists !!!")
-        if not os.path.exists(self.folder2) and create:
-            os.mkdir(self.folder2)
-        else:
-            raise ValueError("log: Target directory to sync does not exists")
+        
+        if not os.path.exists(self.folder2):
+            if create:
+                os.mkdir(self.folder2)
+            else:
+                raise ValueError("log: Target directory to sync does not exists")
+        
         self.folder1_name = os.path.basename(folder1)
         self.folder2_name = os.path.basename(folder2)
         
@@ -67,16 +71,22 @@ class Sync():
             self.query_content()
             time.sleep(interval)
     
+    def __check_folder1(self):
+        if not (os.path.exists(folder1)):
+            raise  RuntimeError("log: Someone or something just deleted the source folder")
+            
     def query_content(self):
         if not (os.path.exists(folder2)):
             print("log: Someone or something just deleted the target folder")
             os.mkdir(self.folder2)
-            
+        self.__check_folder1()
+        
         for folder1_root, folder1_subdirs , folder1_files in os.walk(self.folder1):
             print("log: Running sync press Ctrl-c to terminate")
 #            print("\nroot: ",folder1_root ,"\nsubdir: " , folder1_subdirs ,"\nfiles: ", folder1_files , "\n")
             # root of the current folder
             
+            self.__check_folder1() # sanity check
             folder2_root = "".join([self.folder2,folder1_root.split(self.folder1_name)[1]])
             
             folder2_subdirs=[]
@@ -105,6 +115,7 @@ class Sync():
                 ## files to create from folder 1 to folder 2
                 
                 copy_file_list= set(folder1_files) - folder2_files
+                self.__check_folder1() # sanity check
                 self.__copy_files(folder1_root,folder2_root,copy_file_list)
                 
                 ## file to be deleted in folder 2 because they dont exists in folder1
@@ -118,7 +129,7 @@ class Sync():
                 self.__del_dir(folder2_root, marked_dir_for_del)
                 
                 ## list of files for updating
-                
+                self.__check_folder1() # sanity check
                 files = set(folder1_files) - copy_file_list
                 
                 list_of_updated_files = []
