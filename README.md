@@ -8,9 +8,8 @@ Usage
 # folder1 location of the folder in absolute or relative format
 # folder2 location of the folder2 in absolute of relative format
 # new is True or False whether target folder2 should be created if it does not exists
-
 sync = Sync(folder1 , folder2  , new)
-sync.start_sync(2)
+sync.start_sync(interval = 2)
 
 ```
 As a simple daemon service in backrground  
