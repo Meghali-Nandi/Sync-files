@@ -18,7 +18,10 @@ class Sync():
         
         if not os.path.exists(self.folder2):
             if create:
-                os.mkdir(self.folder2)
+                try:
+                    os.mkdir(self.folder2)
+                except OSError as e:
+                    print("log: cannot create target folder " , e)
             else:
                 raise ValueError("log: Target directory to sync does not exists")
         
