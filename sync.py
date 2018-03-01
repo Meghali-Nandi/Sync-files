@@ -9,12 +9,19 @@ class Sync():
     # we have to keep one directory as primary folder1 is assumed to be primary
     # becuase otherwise deletion will not be possible since you can not know which folder had the content
     # unless we look for folders marked for deletion by system
-    def __init__(self , folder1 , folder2):
+    def __init__(self , folder1 , folder2 , create=False):
         self.folder1 = self.__normalize_path(folder1)
         self.folder2 = self.__normalize_path(folder2)
+        if not os.path.exists(self.folder1):
+            raise ValueError("log: Given source path doesn't exists !!!")
+        if not os.path.exists(self.folder2) and create:
+            os.mkdir(self.folder2)
+        else:
+            raise ValueError("log: Target directory to sync does not exists")
         self.folder1_name = os.path.basename(folder1)
         self.folder2_name = os.path.basename(folder2)
-        self.query_content()
+        
+        
         
     def __normalize_path(self , path):
         return os.path.abspath(os.sep.join(re.split(r'\\|/', path)))
@@ -55,7 +62,16 @@ class Sync():
         except OSError as e:
                 print("log: failed to delte entire directory + files ",e )
     
+    def start_sync(self, interval):
+        while True:
+            self.query_content()
+            time.sleep(interval)
+    
     def query_content(self):
+        if not (os.path.exists(folder2)):
+            print("log: Someone or something just deleted the target folder")
+            os.mkdir(self.folder2)
+            
         for folder1_root, folder1_subdirs , folder1_files in os.walk(self.folder1):
             print("log: Running sync press Ctrl-c to terminate")
 #            print("\nroot: ",folder1_root ,"\nsubdir: " , folder1_subdirs ,"\nfiles: ", folder1_files , "\n")
@@ -125,9 +141,13 @@ class Sync():
 if __name__ == '__main__':
     folder1 = sys.argv[1]
     folder2 = sys.argv[2]
-    
-    sync = Sync(folder1 , folder2 )
-    while True:
-        sync.query_content()
-        time.sleep(1)
+    new     = False
+    if(len(sys.argv) == 4):
+        if sys.argv[3] == "True" or sys.argv[3] == "t":
+            new = True
+    try:
+        sync = Sync(folder1 , folder2  , new)
+        sync.start_sync(2)
+    except ValueError as e:
+        print(e)
     
